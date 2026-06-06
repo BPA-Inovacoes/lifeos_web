@@ -1,4 +1,4 @@
-import financeManualRaw from "../../../../../docs/MANUAL-FINANCEIRO.md?raw";
+import financeManualRaw from "../../../../content/MANUAL-FINANCEIRO.md?raw";
 
 /** Texto do manual Modo Finanças para a app. */
 export function getFinanceManualMarkdown(): string {

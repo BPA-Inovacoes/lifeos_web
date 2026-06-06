@@ -1,4 +1,4 @@
-import manualRaw from "../../../../docs/MANUAL-UTILIZADOR.md?raw";
+import manualRaw from "../../../content/MANUAL-UTILIZADOR.md?raw";
 
 /** Texto do manual para a app (remove referências só para dev/repo). */
 export function getManualMarkdown(): string {
