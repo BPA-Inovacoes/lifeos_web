@@ -6,8 +6,14 @@
   },
   "rewrites": [
     {
-      "source": "/api/(?!proxy(?:/|$))(.*)",
-      "destination": "/api/proxy?path=$1"
+      "source": "/api/:path*",
+      "destination": "/api/proxy?path=:path*",
+      "missing": [
+        {
+          "type": "query",
+          "key": "path"
+        }
+      ]
     },
     {
       "source": "/((?!api/).*)",
