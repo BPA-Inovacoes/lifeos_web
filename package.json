@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/sync-manuals.mjs",
+    "prebuild": "node scripts/sync-manuals.mjs && node scripts/inject-api-proxy-config.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
