@@ -6,6 +6,12 @@ const HOP_BY_HOP_HEADERS = new Set([
   "x-forwarded-host",
 ]);
 
+/** fetch() descomprime gzip/br — não reencaminhar estes headers da resposta upstream. */
+const UPSTREAM_RESPONSE_SKIP = new Set([
+  ...HOP_BY_HOP_HEADERS,
+  "content-encoding",
+]);
+
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader("content-type", "application/json; charset=utf-8");
@@ -124,8 +130,10 @@ module.exports = async function handler(req, res) {
 
     for (const [key, value] of Object.entries(req.headers)) {
       if (!value || HOP_BY_HOP_HEADERS.has(key.toLowerCase())) continue;
+      if (key.toLowerCase() === "accept-encoding") continue;
       headers.set(key, Array.isArray(value) ? value.join(", ") : value);
     }
+    headers.set("accept-encoding", "identity");
 
     const method = req.method || "GET";
     const body =
@@ -140,7 +148,7 @@ module.exports = async function handler(req, res) {
 
     res.statusCode = upstream.status;
     upstream.headers.forEach((value, key) => {
-      if (HOP_BY_HOP_HEADERS.has(key.toLowerCase())) return;
+      if (UPSTREAM_RESPONSE_SKIP.has(key.toLowerCase())) return;
       res.setHeader(key, value);
     });
 
