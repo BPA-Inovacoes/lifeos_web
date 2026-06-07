@@ -32,7 +32,9 @@ export function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "xavier@bpa.com", password: "xavier123" },
+    defaultValues: import.meta.env.DEV
+      ? { email: "xavier@bpa.com", password: "xavier123" }
+      : { email: "", password: "" },
   });
 
   const [formError, setFormError] = useState<string | null>(null);
