@@ -21,14 +21,23 @@ async function readBody(req) {
   return Buffer.concat(chunks);
 }
 
-function buildTargetUrl(reqUrl, baseUrl) {
+function resolveUpstreamPath(reqUrl) {
   const incoming = new URL(reqUrl || "/", "http://localhost");
-  const cleanBase = baseUrl.replace(/\/$/, "");
-  const path = incoming.pathname.replace(/^\/api/, "") || "/";
-  return `${cleanBase}${path}${incoming.search}`;
+
+  const fromRewrite = incoming.searchParams.get("path");
+  if (fromRewrite) {
+    incoming.searchParams.delete("path");
+    const rest = incoming.searchParams.toString();
+    const base = fromRewrite.startsWith("/") ? fromRewrite : `/${fromRewrite}`;
+    return rest ? `${base}?${rest}` : base;
+  }
+
+  const stripped = incoming.pathname.replace(/^\/api/, "") || "/";
+  const rest = incoming.searchParams.toString();
+  return rest ? `${stripped}?${rest}` : stripped;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const baseUrl = process.env.API_BASE_URL || process.env.VITE_API_BASE_URL;
 
   if (!baseUrl) {
@@ -40,7 +49,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const targetUrl = buildTargetUrl(req.url, baseUrl);
+    const upstreamPath = resolveUpstreamPath(req.url);
+    const targetUrl = `${baseUrl.replace(/\/$/, "")}${upstreamPath}`;
     const headers = new Headers();
 
     for (const [key, value] of Object.entries(req.headers)) {
@@ -74,4 +84,4 @@ export default async function handler(req, res) {
       details: error instanceof Error ? error.message : "Erro desconhecido",
     });
   }
-}
+};
